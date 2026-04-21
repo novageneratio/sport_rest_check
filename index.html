@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Поиск товара (через API)</title>
+    <style>
+        body { font-family: Arial; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+        input, button { font-size: 16px; padding: 8px; }
+        #result { margin-top: 20px; background: #f4f4f4; padding: 20px; border-radius: 8px; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Поиск товара по артикулу (быстро)</h1>
+    <p>Введите артикул (например, 53126ПУ)</p>
+    <input type="text" id="articleInput" placeholder="Артикул" value="53126ПУ">
+    <button id="searchBtn">Найти</button>
+    <div id="result"></div>
+
+    <script>
+        // Замени на свой URL воркера после деплоя
+        const API_URL = 'https://sportrest-parser.ТВОЙ_СУБДОМЕН.workers.dev';
+
+        const input = document.getElementById('articleInput');
+        const btn = document.getElementById('searchBtn');
+        const resultDiv = document.getElementById('result');
+
+        async function search() {
+            const article = input.value.trim();
+            if (!article) return;
+
+            resultDiv.innerHTML = '⏳ Поиск...';
+            try {
+                const response = await fetch(`${API_URL}?article=${encodeURIComponent(article)}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Ошибка сервера');
+                }
+
+                // Формируем красивый вывод
+                resultDiv.innerHTML = `
+                    <h3>${data.name}</h3>
+                    <p><strong>Артикул:</strong> ${data.article}</p>
+                    <p><strong>Код:</strong> ${data.code}</p>
+                    <p><strong>Производитель:</strong> ${data.manufacturer}</p>
+                    <p><strong>Цена:</strong> ${data.price} руб.</p>
+                    <p><strong>Остаток:</strong> ${data.stock} ${data.unit}</p>
+                    ${data.url ? `<img src="${data.url}" style="max-width:200px;" onerror="this.style.display='none'">` : ''}
+                `;
+            } catch (err) {
+                resultDiv.innerHTML = `<div class="error">❌ ${err.message}</div>`;
+            }
+        }
+
+        btn.addEventListener('click', search);
+        input.addEventListener('keypress', e => e.key === 'Enter' && search());
+    </script>
+</body>
+</html>
