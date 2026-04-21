@@ -31,7 +31,7 @@
 
             resultDiv.innerHTML = '⏳ Поиск...';
             try {
-                const response = await fetch(`${API_URL}?article=${encodeURIComponent(article)}`);
+                const response = await get(`${API_URL}?article=${encodeURIComponent(article)}`);
                 const data = await response.json();
 
                 if (!response.ok) {
